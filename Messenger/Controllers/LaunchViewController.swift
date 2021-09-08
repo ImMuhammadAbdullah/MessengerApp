@@ -1,13 +1,13 @@
 //
-//  LoginViewController.swift
+//  LaunchViewController.swift
 //  Messenger
 //
-//  Created by Muhammad Abullah on 07/09/2021.
+//  Created by Muhammad Abullah on 08/09/2021.
 //
 
 import UIKit
 
-class LoginViewController: UIViewController {
+class LaunchViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()

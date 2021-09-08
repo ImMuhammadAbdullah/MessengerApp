@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D6A4918626E8620900CB2761 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A4918526E8620900CB2761 /* Extensions.swift */; };
+		D6A4918826E86EBC00CB2761 /* LaunchViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A4918726E86EBC00CB2761 /* LaunchViewController.swift */; };
+		D6A4918A26E8721F00CB2761 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A4918926E8721F00CB2761 /* Utilities.swift */; };
+		D6A4918C26E87CD200CB2761 /* CopyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A4918B26E87CD200CB2761 /* CopyViewController.swift */; };
 		D6D3C50B26E77B1B0053ED71 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D3C50A26E77B1B0053ED71 /* AppDelegate.swift */; };
 		D6D3C50D26E77B1B0053ED71 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D3C50C26E77B1B0053ED71 /* SceneDelegate.swift */; };
 		D6D3C50F26E77B1B0053ED71 /* ConversationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D3C50E26E77B1B0053ED71 /* ConversationsViewController.swift */; };
@@ -22,6 +26,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D6A4918526E8620900CB2761 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		D6A4918726E86EBC00CB2761 /* LaunchViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchViewController.swift; sourceTree = "<group>"; };
+		D6A4918926E8721F00CB2761 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
+		D6A4918B26E87CD200CB2761 /* CopyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyViewController.swift; sourceTree = "<group>"; };
 		D6D3C50726E77B1B0053ED71 /* Messenger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Messenger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D6D3C50A26E77B1B0053ED71 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D6D3C50C26E77B1B0053ED71 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -81,13 +89,13 @@
 		D6D3C51E26E77CB00053ED71 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
+				D6EE727B26E7C155008AEDFB /* Login */,
 				D6D3C50E26E77B1B0053ED71 /* ConversationsViewController.swift */,
-				D6D3C52426E77F5D0053ED71 /* LoginViewController.swift */,
-				D6D3C52626E77F760053ED71 /* RegisterViewController.swift */,
 				D6D3C52826E77F870053ED71 /* PhotoViewerViewController.swift */,
 				D6D3C52A26E77FA90053ED71 /* VideoPlayerViewController.swift */,
 				D6D3C52C26E77FC30053ED71 /* NewConversationViewController.swift */,
 				D6D3C52E26E77FD60053ED71 /* ProfileViewController.swift */,
+				D6A4918726E86EBC00CB2761 /* LaunchViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -120,6 +128,8 @@
 			children = (
 				D6D3C50A26E77B1B0053ED71 /* AppDelegate.swift */,
 				D6D3C50C26E77B1B0053ED71 /* SceneDelegate.swift */,
+				D6A4918526E8620900CB2761 /* Extensions.swift */,
+				D6A4918926E8721F00CB2761 /* Utilities.swift */,
 			);
 			path = Resourses;
 			sourceTree = "<group>";
@@ -131,6 +141,16 @@
 				D6D3C51526E77B1C0053ED71 /* LaunchScreen.storyboard */,
 			);
 			path = Storyboards;
+			sourceTree = "<group>";
+		};
+		D6EE727B26E7C155008AEDFB /* Login */ = {
+			isa = PBXGroup;
+			children = (
+				D6D3C52426E77F5D0053ED71 /* LoginViewController.swift */,
+				D6D3C52626E77F760053ED71 /* RegisterViewController.swift */,
+				D6A4918B26E87CD200CB2761 /* CopyViewController.swift */,
+			);
+			path = Login;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -208,9 +228,13 @@
 				D6D3C52D26E77FC30053ED71 /* NewConversationViewController.swift in Sources */,
 				D6D3C50F26E77B1B0053ED71 /* ConversationsViewController.swift in Sources */,
 				D6D3C52B26E77FA90053ED71 /* VideoPlayerViewController.swift in Sources */,
+				D6A4918626E8620900CB2761 /* Extensions.swift in Sources */,
+				D6A4918A26E8721F00CB2761 /* Utilities.swift in Sources */,
 				D6D3C50B26E77B1B0053ED71 /* AppDelegate.swift in Sources */,
 				D6D3C52F26E77FD60053ED71 /* ProfileViewController.swift in Sources */,
+				D6A4918826E86EBC00CB2761 /* LaunchViewController.swift in Sources */,
 				D6D3C50D26E77B1B0053ED71 /* SceneDelegate.swift in Sources */,
+				D6A4918C26E87CD200CB2761 /* CopyViewController.swift in Sources */,
 				D6D3C52926E77F870053ED71 /* PhotoViewerViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
