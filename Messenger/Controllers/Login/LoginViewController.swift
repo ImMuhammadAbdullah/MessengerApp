@@ -17,6 +17,7 @@ class LoginViewController: UIViewController  {
     private let imageView : UIImageView = {
         let imageView = UIImageView()
         imageView.image = UIImage(named: "logo")
+        imageView.tintColor  = .systemGreen
         return imageView
     }()
     private let emailTextField : UITextField = {
