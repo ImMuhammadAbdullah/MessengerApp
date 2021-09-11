@@ -6,7 +6,7 @@
 //
 
 import UIKit
-
+import FirebaseAuth
 class LoginViewController: UIViewController  {
     // settig UI elements here
     private let scrollVeiw : UIScrollView = {
@@ -63,6 +63,7 @@ class LoginViewController: UIViewController  {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        title = "Log in"
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Register", style: .done, target: self, action: #selector(didTapRegister))
         logInButton.addTarget(self, action: #selector(logInBtnTapped), for: .touchUpInside)
         emailTextField.delegate = self
@@ -111,12 +112,26 @@ class LoginViewController: UIViewController  {
     @objc private func logInBtnTapped(){
         emailTextField.resignFirstResponder()
         passwordTextField.resignFirstResponder()
-        let error = validateFields()
-        if error != nil {
-            alert(message: error!)
+        let validationError = validateFields()
+        if validationError != nil {
+            alert(message: validationError!)
             return
         }
         // Firebase log in
+        else{
+            let email = emailTextField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+            let password = emailTextField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+            FirebaseAuth.Auth.auth().signIn(withEmail: email, password: password) {[weak self] result, error in
+                if error != nil{
+                    self?.alert(message: "Error in log in")
+                }
+                else{
+                   // self?.alert(message: "Succesfully log in")
+                    self?.navigationController?.dismiss(animated: true, completion: nil)
+                }
+                
+            }
+        }
     }
     
     

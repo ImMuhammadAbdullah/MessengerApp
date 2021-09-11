@@ -20,8 +20,8 @@
                                 <rect key="frame" x="107" y="348" width="200" height="200"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="ccs-xN-Fza" secondAttribute="height" multiplier="1:1" id="YXG-bK-C0S"/>
-                                    <constraint firstAttribute="width" constant="200" id="vsh-dq-vS2"/>
-                                    <constraint firstAttribute="height" constant="200" id="xFO-bH-9vi"/>
+                                    <constraint firstAttribute="width" relation="lessThanOrEqual" constant="200" id="vsh-dq-vS2"/>
+                                    <constraint firstAttribute="height" relation="lessThanOrEqual" constant="200" id="xFO-bH-9vi"/>
                                 </constraints>
                             </imageView>
                         </subviews>

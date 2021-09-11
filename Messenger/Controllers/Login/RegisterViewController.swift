@@ -6,7 +6,7 @@
 //
 
 import UIKit
-
+import FirebaseAuth
 class RegisterViewController: UIViewController {
     // settig UI elements here
     private let scrollVeiw : UIScrollView = {
@@ -91,7 +91,7 @@ class RegisterViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Log in"
+        title = "Registration"
         view.backgroundColor = .white
         registerButton.addTarget(self, action: #selector(logInBtnTapped), for: .touchUpInside)
         firstNameField.delegate = self
@@ -179,7 +179,30 @@ class RegisterViewController: UIViewController {
         }
         // Firebase log in
         else{
+            let email = emailTextField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+            let password = emailTextField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+            let firstName = firstNameField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
+            let lastName  = lastNameField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
             
+            DatabaseManager.shared.userExist(with: email) { [weak self] exits in
+                guard exits else{
+                    self?.alert(message: "User with this email alreay exists")
+                    return
+                }
+                FirebaseAuth.Auth.auth().createUser(withEmail: email, password: password) { [weak self]result, error in
+                    if error != nil{
+                        self?.alert(message: "Error in creating account")
+                    }
+                    else{
+                        
+                        DatabaseManager.shared.insertUser(with: ChatAppUser(
+                                                            firstName: firstName,
+                                                            lastName: lastName,
+                                                            emailAddress: email))
+                        self?.navigationController?.dismiss(animated: true, completion: nil)
+                    }
+                }
+            }
         }
     }
     
@@ -294,14 +317,20 @@ extension RegisterViewController : UIImagePickerControllerDelegate , UINavigatio
         present(actionSheet, animated: true, completion: nil)
     }
     private func presentCamera(){
-       let vc = UIImagePickerController()
-        vc.delegate = self
-        vc.sourceType = .camera
-        vc.allowsEditing = true
-        present(vc, animated: true, completion: nil)
+        
+        if UIImagePickerController.isSourceTypeAvailable(.camera){
+            let vc = UIImagePickerController()
+            vc.delegate = self
+            vc.sourceType = .camera
+            vc.allowsEditing = true
+            present(vc, animated: true, completion: nil)
+        }
+        else{
+            alert(message: "You are simulater .")
+        }
     }
     private func presentPhotoLibrary(){
-       let vc = UIImagePickerController()
+        let vc = UIImagePickerController()
         vc.delegate = self
         vc.sourceType = .photoLibrary
         vc.allowsEditing = true
