@@ -10,7 +10,12 @@ import FirebaseDatabase
 final class DatabaseManager{
     static let shared = DatabaseManager()
     private let database = Database.database().reference()
-   
+    static func safeEmail(emailAddress : String)->String{
+        var safeEmail = emailAddress.replacingOccurrences(of: ".", with: "-")
+        safeEmail = safeEmail.replacingOccurrences(of: "@", with: "-")
+        return safeEmail
+    }
+    
 }
 // Mark - Account Management
 extension DatabaseManager{
@@ -39,11 +44,61 @@ extension DatabaseManager{
                 completion(false)
                 return
             }
-            completion(true)
+            self.database.child("users").observeSingleEvent(of: .value) { snapShot in
+                if var usersCollection = snapShot.value as? [ [ String : String ]]{
+                    let newElement  =
+                        [
+                            "name" : user.firstName + " " + user.lastName ,
+                            "email" : user.emailAddress
+                        ]
+                    
+                    usersCollection.append(newElement)
+                    self.database.child("users").setValue(usersCollection) { error, _ in
+                        guard error == nil else{
+                            completion(false)
+                            return
+                        }
+                        completion(true)
+                    }
+                    
+                }
+                else{
+                    // create the array
+                    let newCollection : [[ String : String ]] =
+                        [
+                            [
+                                "name" : user.firstName + " " + user.lastName ,
+                                "email" : user.emailAddress
+                            ]
+                        ]
+                    self.database.child("users").setValue(newCollection) { error, _ in
+                        guard error == nil else{
+                            completion(false)
+                            return
+                        }
+                        completion(true)
+                    }
+                }
+            }
         }
     }
-}
-struct ChatAppUser {
+    /// used to search the users form the database
+    public func getAllUsers(completion : @escaping (Result< [ [ String:String ] ] , Error >)->Void){
+       
+        database.child("users").observeSingleEvent(of: .value) {   snapShot in
+            guard let value = snapShot.value as? [[String:String]] else{
+                completion(.failure(DataBaseErrors.failedToFetch))
+                return
+            }
+            completion(.success(value))
+        }
+      }
+    public enum DataBaseErrors: Error{
+        case failedToFetch
+    }
+ }
+ 
+ struct ChatAppUser {
     let firstName: String
     let lastName: String
     let emailAddress: String

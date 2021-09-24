@@ -15,12 +15,12 @@ final class StorageManager{
     // typealis
     public typealias uploadPictureCompletion = (Result<String,Error>) ->Void
     /*
-      /images/abdullah-gmail-com_profile_picture.png
+     /images/abdullah-gmail-com_profile_picture.png
      */
     /// upload the profile picture to the firebase storage
     public func uploadProfilePicture(with data : Data ,filename : String , completion : @escaping uploadPictureCompletion ){
         storage.child("images/\(filename)").putData(data, metadata: nil) { [weak self] metaData, error in
-           
+            
             guard let self = self else{
                 return
             }
@@ -30,8 +30,8 @@ final class StorageManager{
                 completion(.failure(StorageErrors.faildToUpload))
                 return
             }
-           self.storage.child("images/\(filename)").downloadURL {  url, urlError in
-               
+            self.storage.child("images/\(filename)").downloadURL {  url, urlError in
+                
                 if  url == nil {
                     print("Falid to download the picture ulr from the storage")
                     completion(.failure(StorageErrors.faildToDownloadUrl))
@@ -50,7 +50,18 @@ final class StorageManager{
         case faildToUpload
         case faildToDownloadUrl
     }
+    /// download the photo from the firebase storage
+    public func downloadURL(for path : String , completion : @escaping ( Result<String,Error> )-> Void){
+        let reference = storage.child(path)
+        reference.downloadURL { url, error in
+            guard let url = url,error == nil else{
+                completion(.failure(StorageErrors.faildToDownloadUrl))
+                return
+            }
+            let urlString = url.absoluteString
+            completion(.success(urlString))
+        }
+    }
     
-  
     
 }

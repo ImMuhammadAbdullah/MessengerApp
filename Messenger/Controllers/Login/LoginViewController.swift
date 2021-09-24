@@ -148,6 +148,12 @@ class LoginViewController: UIViewController  {
                     self?.alert(message: "Error in log in")
                 }
                 else{
+                    guard let result = result else {
+                        return
+                    }
+                    let user  = result.user
+                    UserDefaults.standard.setValue(email, forKey: "email")
+                    print("Log in user id \(user)")
                     self?.loder.stopAnimating()
                     // self?.alert(message: "Succesfully log in")
                     self?.navigationController?.dismiss(animated: true, completion: nil)
@@ -245,7 +251,7 @@ extension LoginViewController : LoginButtonDelegate{
                 self.alert(message: "Failed to get the email and user name")
                 return
             }
-            
+            UserDefaults.standard.setValue(email, forKey: "email")
             let nameComponents = userName.components(separatedBy: " ")
             guard  nameComponents.count == 2 else{
                 return

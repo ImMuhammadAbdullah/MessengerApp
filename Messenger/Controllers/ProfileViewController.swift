@@ -10,6 +10,7 @@ import FirebaseAuth
 import FBSDKLoginKit
 class ProfileViewController: UIViewController {
 
+    
     let data = ["Log out"]
     @IBOutlet var tableView : UITableView!
     override func viewDidLoad() {
@@ -17,6 +18,61 @@ class ProfileViewController: UIViewController {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "cell")
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.tableHeaderView = createTableHeader()
+    }
+    
+     func createTableHeader() ->UIView?{
+        guard let email = UserDefaults.standard.value(forKey: "email") as? String else {
+            return nil
+        }
+        let safeEmail = DatabaseManager.safeEmail(emailAddress: email)
+        let fileName = safeEmail + "_profile_picture.png"
+        let path = "images/"+fileName
+        let headerView = UIView(frame: CGRect(x: 0,
+                                        y: 0,
+                                        width: self.view.width,
+                                        height: 300))
+        headerView.backgroundColor = .white
+        
+        let imageView = UIImageView(frame: CGRect(x: (view.width-150)/2,
+                                                  y: 75,
+                                                  width: 150,
+                                                  height: 150))
+        imageView.contentMode = .scaleAspectFill
+        imageView.layer.borderColor = UIColor.link.cgColor
+        imageView.backgroundColor = .white
+        imageView.layer.borderWidth = 3
+        imageView.layer.masksToBounds = true
+        imageView.layer.cornerRadius = imageView.width / 2
+        headerView.addSubview(imageView)
+        
+        
+        StorageManager.shared.downloadURL(for: path) {[weak self] result in
+            switch result{
+            case .success(let url):
+                print(url)
+                self?.downloadImage(imageView: imageView, url: url)
+            case .failure(let error):
+                print("Error in downloding url \(error)")
+            }
+        }
+        return headerView
+    }
+    
+    private func downloadImage(imageView : UIImageView , url : String){
+       let referenceURL = URL(string: url)
+        guard let referenceURL = referenceURL else {
+            return
+        }
+        URLSession.shared.dataTask(with: referenceURL) {  data, _, error in
+            guard let data = data , error == nil else{
+                return
+            }
+            DispatchQueue.main.async {
+                let image = UIImage(data: data)
+                imageView.image = image
+            }
+        }.resume()
     }
     
     private func alert(message : String)  {
