@@ -7,8 +7,13 @@
 
 import UIKit
 import FirebaseAuth
+import NVActivityIndicatorView
 class RegisterViewController: UIViewController {
     // settig UI elements here
+    private let loder : NVActivityIndicatorView = {
+        let loder = NVActivityIndicatorView(frame: CGRect(x:0 , y: 0, width: 52 , height: 52), type: .ballClipRotatePulse, color: .link, padding: nil)
+        return loder
+    }()
     private let scrollVeiw : UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.clipsToBounds = true
@@ -106,6 +111,7 @@ class RegisterViewController: UIViewController {
         scrollVeiw.addSubview(emailTextField)
         scrollVeiw.addSubview(passwordTextField)
         scrollVeiw.addSubview(registerButton)
+        scrollVeiw.addSubview(loder)
         
         scrollVeiw.isUserInteractionEnabled = true
         imageView.isUserInteractionEnabled = true
@@ -120,6 +126,7 @@ class RegisterViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         scrollVeiw.frame = view.bounds
+        loder.center = view.center
         let size = scrollVeiw.width / 3
         imageView.frame = CGRect(x: (scrollVeiw.width - size)/2,
                                  y: 20,
@@ -133,11 +140,11 @@ class RegisterViewController: UIViewController {
                                       height: 52
         )
         lastNameField.frame = CGRect(x: 30,
-                                      y: firstNameField.bottom + 10 ,
-                                      width: scrollVeiw.width - 60 ,
-                                      height: 52
+                                     y: firstNameField.bottom + 10 ,
+                                     width: scrollVeiw.width - 60 ,
+                                     height: 52
         )
-
+        
         emailTextField.frame = CGRect(x: 30,
                                       y: lastNameField.bottom + 10 ,
                                       width: scrollVeiw.width - 60 ,
@@ -149,13 +156,13 @@ class RegisterViewController: UIViewController {
                                          height: 52
         )
         registerButton.frame = CGRect(x: 30,
-                                   y: passwordTextField.bottom + 10 ,
-                                   width: scrollVeiw.width - 60 ,
-                                   height: 52
+                                      y: passwordTextField.bottom + 10 ,
+                                      width: scrollVeiw.width - 60 ,
+                                      height: 52
         )
     }
     
-   
+    
     
     @objc private func logInBtnTapped(){
         emailTextField.resignFirstResponder()
@@ -163,18 +170,22 @@ class RegisterViewController: UIViewController {
         let filedError = validateFields()
         let passwordError = securePassword()
         let emailError = emailFormat()
-
+        loder.startAnimating()
         if filedError != nil {
             // There's something wrong with the fields, show error message
+            loder.stopAnimating()
             alert(message: filedError!)
         }
         else if passwordError != nil && emailError != nil{
+            loder.stopAnimating()
             alert(message: passwordError! + "\n" + emailError!)
         }
         else if passwordError != nil && emailError == nil{
+            loder.stopAnimating()
             alert(message: passwordError! )
         }
         else if passwordError == nil && emailError != nil{
+            loder.stopAnimating()
             alert(message: emailError! )
         }
         // Firebase log in
@@ -185,21 +196,46 @@ class RegisterViewController: UIViewController {
             let lastName  = lastNameField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
             
             DatabaseManager.shared.userExist(with: email) { [weak self] exits in
-                guard exits else{
-                    self?.alert(message: "User with this email alreay exists")
+                guard let self =  self else{
+                    return
+                }
+                if exits == false{
+                    self.loder.stopAnimating()
+                    self.alert(message: "User with this email alreay exists")
                     return
                 }
                 FirebaseAuth.Auth.auth().createUser(withEmail: email, password: password) { [weak self]result, error in
+                    guard let self =  self else{
+                        return
+                    }
                     if error != nil{
-                        self?.alert(message: "Error in creating account")
+                        self.loder.stopAnimating()
+                        self.alert(message: "Error in creating account")
                     }
                     else{
-                        
-                        DatabaseManager.shared.insertUser(with: ChatAppUser(
-                                                            firstName: firstName,
-                                                            lastName: lastName,
-                                                            emailAddress: email))
-                        self?.navigationController?.dismiss(animated: true, completion: nil)
+                        let chatUser = ChatAppUser(
+                            firstName: firstName,
+                            lastName: lastName,
+                            emailAddress: email)
+                        DatabaseManager.shared.insertUser(with: chatUser) { success in
+                            if success{
+                                // upload the profile picture
+                                guard let image = self.imageView.image, let data = image.pngData() else {
+                                    return
+                                }
+                                let fileName = chatUser.profilePictureFileName
+                                StorageManager.shared.uploadProfilePicture(with: data, filename: fileName) { result in
+                                    switch result {
+                                    case  .success(let downloadUrl):
+                                        UserDefaults.standard.set(downloadUrl, forKey:  "profile_picture_url")
+                                        print(downloadUrl)
+                                    case  .failure(let error):
+                                        print("Faild in uploading to the storage \(error)")
+                                    }
+                                }
+                            }
+                        }
+                        self.navigationController?.dismiss(animated: true, completion: nil)
                     }
                 }
             }
@@ -236,13 +272,13 @@ class RegisterViewController: UIViewController {
             error = error +  "Fill email field.\n"
             check = true
         }
-         if
+        if
             passwordTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) == "" {
             
             error = error + "Fill in the password Filed."
             check = true
         }
-    
+        
         if check{
             return error
         }
@@ -260,10 +296,10 @@ class RegisterViewController: UIViewController {
         return nil
     }
     // check correct email format
-   private func emailFormat() -> String? {
+    private func emailFormat() -> String? {
         let cleanedEmail = emailTextField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
         if Utilities.isValidEmail(email: cleanedEmail) == false {
-          return " Incorrect email format . \n"
+            return " Incorrect email format . \n"
         }
         return nil
     }
@@ -275,7 +311,7 @@ extension RegisterViewController : UITextFieldDelegate {
         if textField == firstNameField{
             lastNameField.becomeFirstResponder()
         }
-       else if textField == lastNameField{
+        else if textField == lastNameField{
             emailTextField.becomeFirstResponder()
         }
         else if textField == emailTextField{

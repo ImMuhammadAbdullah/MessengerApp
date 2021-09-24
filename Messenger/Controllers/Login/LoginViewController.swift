@@ -8,8 +8,13 @@
 import UIKit
 import FirebaseAuth
 import FBSDKLoginKit
+import NVActivityIndicatorView
 class LoginViewController: UIViewController  {
     // settig UI elements here
+    private let loder : NVActivityIndicatorView = {
+        let loder = NVActivityIndicatorView(frame: CGRect(x:0 , y: 0, width: 52 , height: 52), type: .ballClipRotatePulse, color: .link, padding: nil)
+        return loder
+    }()
     private let fbLogInBtn : FBLoginButton = {
         var loginbtn = FBLoginButton()
         loginbtn.permissions = ["public_profile", "email"]
@@ -82,11 +87,13 @@ class LoginViewController: UIViewController  {
         scrollVeiw.addSubview(passwordTextField)
         scrollVeiw.addSubview(logInButton)
         scrollVeiw.addSubview(fbLogInBtn)
+        scrollVeiw.addSubview(loder)
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         scrollVeiw.frame = view.bounds
+        loder.center = view.center
         let size = scrollVeiw.width / 3
         imageView.frame = CGRect(x: (scrollVeiw.width - size)/2,
                                  y: 20,
@@ -132,13 +139,16 @@ class LoginViewController: UIViewController  {
         }
         // Firebase log in
         else{
+            loder.startAnimating()
             let email = emailTextField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
             let password = emailTextField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
             FirebaseAuth.Auth.auth().signIn(withEmail: email, password: password) {[weak self] result, error in
-                if result != nil && error != nil{
+                if error != nil {
+                    self?.loder.stopAnimating()
                     self?.alert(message: "Error in log in")
                 }
                 else{
+                    self?.loder.stopAnimating()
                     // self?.alert(message: "Succesfully log in")
                     self?.navigationController?.dismiss(animated: true, completion: nil)
                 }
@@ -199,23 +209,39 @@ extension LoginViewController  : UITextFieldDelegate {
 
 extension LoginViewController : LoginButtonDelegate{
     func loginButton(_ loginButton: FBLoginButton, didCompleteWith result: LoginManagerLoginResult?, error: Error?) {
+        loder.startAnimating()
         guard  let token = result?.token?.tokenString else {
+            loder.stopAnimating()
+            alert(message: "User failed to log in wiht facebook")
             return
-                alert(message: "User failed to log in wiht facebook")
         }
         print("Token is \(token)")
-        let facebookRequest = FBSDKLoginKit.GraphRequest(graphPath: "me", parameters: ["fields":"email, name"], tokenString: token, version: nil, httpMethod: .get)
+        let facebookRequest = FBSDKLoginKit.GraphRequest(graphPath: "me",
+                                                         parameters:
+                                                            [
+                                                                "fields":"email, name,picture.type(large)"
+                                                            ],
+                                                         tokenString: token,
+                                                         version: nil,
+                                                         httpMethod: .get)
         facebookRequest.start { [weak self]_, result1, error1 in
             guard let self = self else{
                 return
             }
             guard let result1 = result1 as? [String : Any] ,error1 == nil else{
+                self.loder.stopAnimating()
                 self.alert(message: "User failed to log in wiht facebook")
                 return
             }
             print(result1)
             
-            guard let userName = result1["name"]as? String ,let email = result1["email"]as? String else{
+            guard let userName = result1["name"]as? String ,
+                  let email = result1["email"]as? String,
+                  let picture = result1["picture"] as? [String: Any],
+                  let data = picture["data"] as? [String: Any],
+                  let pictureUrl = data["url"] as? String
+            else{
+                self.loder.stopAnimating()
                 self.alert(message: "Failed to get the email and user name")
                 return
             }
@@ -228,8 +254,34 @@ extension LoginViewController : LoginButtonDelegate{
             let firstName = nameComponents[0]
             let lastName = nameComponents[1]
             DatabaseManager.shared.userExist(with: email) { exits in
-                if !exits {
-                    DatabaseManager.shared.insertUser(with: ChatAppUser(firstName: firstName, lastName: lastName, emailAddress: email))
+                if exits == true {
+                    let chatUser =  ChatAppUser(firstName: firstName, lastName: lastName, emailAddress: email)
+                    DatabaseManager.shared.insertUser(with: chatUser) { success in
+                        if success{
+                            guard let url = URL(string: pictureUrl) else {
+                                return
+                            }
+                            
+                            URLSession.shared.dataTask(with: url) { data, _, _ in
+                                
+                                guard let data = data else{
+                                    return
+                                }
+                                // upload the profile picture
+                                let fileName = chatUser.profilePictureFileName
+                                StorageManager.shared.uploadProfilePicture(with: data, filename: fileName) { result in
+                                    switch result {
+                                    case  .success(let downloadUrl):
+                                        UserDefaults.standard.set(downloadUrl, forKey:  "profile_picture_url")
+                                        print(downloadUrl)
+                                    case  .failure(let error):
+                                        print("Faild in uploading to the storage \(error)")
+                                    }
+                                }
+                            }.resume()
+                            
+                        }
+                    }
                 }
             }
             let credential = FacebookAuthProvider.credential(withAccessToken: token)
@@ -239,9 +291,11 @@ extension LoginViewController : LoginButtonDelegate{
                     return
                 }
                 if  error != nil{
+                    self.loder.stopAnimating()
                     self.alert(message: "Failed to facebook graph request")
                 }
                 print(result)
+                self.loder.stopAnimating()
                 self.navigationController?.dismiss(animated: true, completion: nil)
             }
         }

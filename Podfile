@@ -9,8 +9,16 @@ target 'Messenger' do
 pod'Firebase/Core'
 pod'Firebase/Auth'
 pod'Firebase/Database'
+pod'Firebase/Storage'
 pod'Firebase/Analytics'
-# Facebook
+# Facebook log in
 pod 'FBSDKLoginKit'
+# Google log in
+pod 'GoogleSignIn'
+# Custom Loder
+pod 'NVActivityIndicatorView'
+pod 'MessageKit'
+pod 'RealmSwift'
+pod 'SDWebImage'
 
 end
