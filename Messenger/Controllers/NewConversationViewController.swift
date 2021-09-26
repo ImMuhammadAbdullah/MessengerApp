@@ -9,6 +9,7 @@ import UIKit
 import NVActivityIndicatorView
 class NewConversationViewController: UIViewController {
 
+    public var completion : (([ String : String ]) -> (Void))?
     private var users = [[ String : String ]]()
     private var results = [[ String : String ]]()
     private var hasFeched = false
@@ -65,6 +66,7 @@ class NewConversationViewController: UIViewController {
     
     
 }
+// implemetation of tableview delegate
 extension NewConversationViewController : UITableViewDelegate , UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return results.count
@@ -78,6 +80,11 @@ extension NewConversationViewController : UITableViewDelegate , UITableViewDataS
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        // start the conversation with selected row
+        let targetUserData = results[indexPath.row]
+        dismiss(animated: true) { [weak self ] in
+            self?.completion?(targetUserData)
+        }
     }
 }
 // implementation of searchbar delegate
