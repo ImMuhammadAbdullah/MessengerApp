@@ -142,24 +142,53 @@ class LoginViewController: UIViewController  {
             loder.startAnimating()
             let email = emailTextField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
             let password = emailTextField.text!.trimmingCharacters(in: .whitespacesAndNewlines)
-            FirebaseAuth.Auth.auth().signIn(withEmail: email, password: password) {[weak self] result, error in
-                if error != nil {
-                    self?.loder.stopAnimating()
-                    self?.alert(message: "Error in log in")
+            
+            DatabaseManager.shared.userExist(with: email) { [weak self] exits in
+                if exits == false {
+                    FirebaseAuth.Auth.auth().signIn(withEmail: email, password: password) {[weak self] result, error in
+                        if error != nil {
+                            self?.loder.stopAnimating()
+                            self?.alert(message: "Error in log in")
+                        }
+                        else{
+                            guard let result = result else {
+                                return
+                            }
+                            let user  = result.user
+                            UserDefaults.standard.setValue(email, forKey: "email")
+                            // save the name of current user in user defalut
+                            let userSafeEmail = DatabaseManager.safeEmail(emailAddress: email)
+                            DatabaseManager.shared.getDataFor(path: userSafeEmail) {  result in
+                                switch result{
+                                
+                                case .success(let data):
+                                    print(" User data \(data)")
+                                    guard let userData  = data as? [String : Any],
+                                          let firstName = userData["first_name"] as? String,
+                                          let lastName  = userData["last_name"] as? String
+                                    else {
+                                        return
+                                    }
+                                    UserDefaults.standard.setValue("\(firstName) \(lastName)", forKey: "name")
+                                case .failure(let error):
+                                    print("Error in getting user data \(error)")
+                                }
+                            }
+                            print("Log in user id \(user)")
+                            self?.loder.stopAnimating()
+                            // self?.alert(message: "Succesfully log in")
+                            self?.navigationController?.dismiss(animated: true, completion: nil)
+                        }
+                    }
                 }
                 else{
-                    guard let result = result else {
-                        return
-                    }
-                    let user  = result.user
-                    UserDefaults.standard.setValue(email, forKey: "email")
-                    print("Log in user id \(user)")
                     self?.loder.stopAnimating()
-                    // self?.alert(message: "Succesfully log in")
-                    self?.navigationController?.dismiss(animated: true, completion: nil)
+                    self?.passwordTextField.text = ""
+                    self?.emailTextField.text = ""
+                    self?.alert(message: "You are not registerd in this app. Please register yourself !")
                 }
-                
             }
+            
         }
     }
     
@@ -252,6 +281,7 @@ extension LoginViewController : LoginButtonDelegate{
                 return
             }
             UserDefaults.standard.setValue(email, forKey: "email")
+            UserDefaults.standard.setValue(userName, forKey: "name")
             let nameComponents = userName.components(separatedBy: " ")
             guard  nameComponents.count == 2 else{
                 return
@@ -267,9 +297,7 @@ extension LoginViewController : LoginButtonDelegate{
                             guard let url = URL(string: pictureUrl) else {
                                 return
                             }
-                            
                             URLSession.shared.dataTask(with: url) { data, _, _ in
-                                
                                 guard let data = data else{
                                     return
                                 }

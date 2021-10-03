@@ -17,6 +17,19 @@ final class DatabaseManager{
     }
     
 }
+
+extension DatabaseManager{
+    public func getDataFor(path: String, compeletion : @escaping ( Result<Any , Error > ) -> Void){
+        self.database.child("\(path)").observeSingleEvent(of: .value) { snapShot in
+            guard let  value = snapShot.value as? [String:Any] else{
+                compeletion(.failure(DataBaseErrors.failedToFetch))
+                return
+            }
+            compeletion(.success(value))
+        }
+    }
+}
+
 // Mark - Account Management
 extension DatabaseManager{
     /// It checks whether the account with this email is already present or not ..
@@ -24,7 +37,7 @@ extension DatabaseManager{
         var safeEmail = email.replacingOccurrences(of: ".", with: "-")
         safeEmail = safeEmail.replacingOccurrences(of: "@", with: "-")
         database.child(safeEmail).observeSingleEvent(of: .value) { snapShot in
-            if  snapShot.value as? [String : String]  != nil {
+            if  snapShot.value as? [String : Any]  != nil {
                 completion(false)
                 return
             }
@@ -147,7 +160,9 @@ extension DatabaseManager{
                                firstMessage : Message ,
                                name : String ,
                                completion : @escaping (Bool) -> Void)  {
-        guard let currentUserEmail = UserDefaults.standard.value(forKey: "email") as? String else {
+        guard let currentUserEmail = UserDefaults.standard.value(forKey: "email") as? String,
+              let senderName = UserDefaults.standard.value(forKey: "name") as? String
+        else {
             return
         }
         
@@ -201,11 +216,11 @@ extension DatabaseManager{
                     "isRead":false,
                 ]
             ]
-            
+           
             let recipient_newConversationData : [String : Any]  = [
                 "id" : conversationID,
                 "other_user_email" : currentUserSafeEmail,
-                "name" : "self",
+                "name" : senderName,
                 "latest_message": [
                     "date": dateString ,
                     "message" : message ,
@@ -231,6 +246,12 @@ extension DatabaseManager{
             // update current user conversation entery
             if var conversation = userNode["conversations"] as? [[String:Any]]{
                 // conversation exits for current user
+                
+                
+                // not implemented yet
+                
+                
+                
                 // you should append in it
                 conversation.append(newConversationData)
                 userNode["conversations"] = conversation
@@ -259,8 +280,7 @@ extension DatabaseManager{
                     self?.finishCreatingConversation(conversationID: conversationID,
                                                     firstMessage: firstMessage,
                                                     name: name,
-                                                    completion: completion)
-                    
+                                                    completion: completion)                    
                 }
             }
         }
@@ -427,7 +447,78 @@ extension DatabaseManager{
         }
     }
     ///Sent a messag with target conversation and message
-    public func sendMessage(to conversation : String , message: Message , completion: @escaping (Bool)->Void){
+    public func sendMessage(to conversation : String , otherUserEmail : String , name : String , message: Message , completion: @escaping (Bool)->Void){
+        // add new message in messages
+        
+        database.child("\(conversation)/messages").observeSingleEvent(of: .value) { [weak self] snapshot in
+            guard var currentMessages = snapshot.value as? [[String : Any]]   else{
+                completion(false)
+                return
+            }
+            
+            var newMessage = ""
+            
+            //in this switch we are going to handle all kind of messages text, video , audio , photo
+            switch message.kind{
+            case .text(let messageText):
+                newMessage = messageText
+            case .attributedText(_):
+                break
+            case .photo(_):
+                break
+            case .video(_):
+                break
+            case .location(_):
+                break
+            case .emoji(_):
+                break
+            case .audio(_):
+                break
+            case .contact(_):
+                break
+            case .linkPreview(_):
+                break
+            case .custom(_):
+                break
+            }
+            
+            let messageDate = message.sentDate
+            let dateString = ChatViewController.dateFormatter.string(from: messageDate)
+            
+            guard let currentUserEmail = UserDefaults.standard.value(forKey: "email") as? String else{
+                completion(false)
+                return
+            }
+            
+            let currentUserSafeEmail = DatabaseManager.safeEmail(emailAddress: currentUserEmail)
+            
+            let newMessageEntry : [String : Any] =
+                [
+                    "id" : message.messageId,
+                    "type": message.kind.messageKindString,
+                    "name": name,
+                    "content": newMessage,
+                    "date": dateString,
+                    "sender_email": currentUserSafeEmail,
+                    "isRead": false
+                ]
+            currentMessages.append(newMessageEntry)
+            guard let strongSelf = self else{
+                return
+            }
+            self?.database.child("\(conversation)/messages").setValue(currentMessages,withCompletionBlock: { error, _ in
+                if error != nil{
+                    completion(false)
+                    return
+                }
+                else{
+                    // update sender latest message
+                    
+                    // update reciptient latest message
+                    completion(true)
+                }
+            })
+        }
         
     }
 }

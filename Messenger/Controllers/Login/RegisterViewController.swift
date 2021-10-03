@@ -219,6 +219,8 @@ class RegisterViewController: UIViewController {
                             emailAddress: email)
                         DatabaseManager.shared.insertUser(with: chatUser) { success in
                             if success{
+                                UserDefaults.standard.setValue(email, forKey: "email")
+                                UserDefaults.standard.setValue("\(firstName) \(lastName)", forKey: "name")
                                 // upload the profile picture
                                 guard let image = self.imageView.image, let data = image.pngData() else {
                                     return
@@ -385,3 +387,5 @@ extension RegisterViewController : UIImagePickerControllerDelegate , UINavigatio
         picker.dismiss(animated: true, completion: nil)
     }
 }
+
+

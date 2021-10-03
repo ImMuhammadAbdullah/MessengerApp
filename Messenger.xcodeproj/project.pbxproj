@@ -14,7 +14,6 @@
 		D6A19DF326EB2B3D003391A5 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = D6A19DF226EB2B3D003391A5 /* GoogleService-Info.plist */; };
 		D6A4918626E8620900CB2761 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A4918526E8620900CB2761 /* Extensions.swift */; };
 		D6A4918A26E8721F00CB2761 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A4918926E8721F00CB2761 /* Utilities.swift */; };
-		D6A4918C26E87CD200CB2761 /* CopyViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6A4918B26E87CD200CB2761 /* CopyViewController.swift */; };
 		D6D1338F26EB4EF600C39C82 /* DatabaseManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D1338E26EB4EF600C39C82 /* DatabaseManager.swift */; };
 		D6D3C50B26E77B1B0053ED71 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D3C50A26E77B1B0053ED71 /* AppDelegate.swift */; };
 		D6D3C50D26E77B1B0053ED71 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6D3C50C26E77B1B0053ED71 /* SceneDelegate.swift */; };
@@ -40,7 +39,6 @@
 		D6A19DF226EB2B3D003391A5 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		D6A4918526E8620900CB2761 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		D6A4918926E8721F00CB2761 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
-		D6A4918B26E87CD200CB2761 /* CopyViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyViewController.swift; sourceTree = "<group>"; };
 		D6D1338E26EB4EF600C39C82 /* DatabaseManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseManager.swift; sourceTree = "<group>"; };
 		D6D3C50726E77B1B0053ED71 /* Messenger.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Messenger.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D6D3C50A26E77B1B0053ED71 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -184,7 +182,6 @@
 			children = (
 				D6D3C52426E77F5D0053ED71 /* LoginViewController.swift */,
 				D6D3C52626E77F760053ED71 /* RegisterViewController.swift */,
-				D6A4918B26E87CD200CB2761 /* CopyViewController.swift */,
 			);
 			path = Login;
 			sourceTree = "<group>";
@@ -318,7 +315,6 @@
 				D67B6AEA26FB4EED00FE6F99 /* ChatViewController.swift in Sources */,
 				D6D3C50D26E77B1B0053ED71 /* SceneDelegate.swift in Sources */,
 				D636D7F426FC72E000565A7C /* StorageManager.swift in Sources */,
-				D6A4918C26E87CD200CB2761 /* CopyViewController.swift in Sources */,
 				D6D3C52926E77F870053ED71 /* PhotoViewerViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

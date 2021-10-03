@@ -136,22 +136,29 @@ extension ChatViewController : InputBarAccessoryViewDelegate{
         }
         print("Sending text\(text)")
         messageInputBar.inputTextView.text = " "
+        // first create the message user going to send
+        let message = Message(sender: selfSender,
+                              /*
+                              message id must be unique for every messag.
+                              So, it is otherUserEmail , senderEmail , date and randomInt
+                              */
+                              messageId: messageId,
+                              sentDate: Date(),
+                              kind: .text(text))
         // sent message
         if isNewConversation{
             // create a convo in database
-            
-            // first create the message user going to send
-            let message = Message(sender: selfSender,
-                                  /*
-                                  message id must be unique for every messag.
-                                  So, it is otherUserEmail , senderEmail , date and randomInt
-                                  */
-                                  messageId: messageId,
-                                  sentDate: Date(),
-                                  kind: .text(text))
-            DatabaseManager.shared.createNewconversation(with: otherUserEmail, firstMessage: message ,name: self.title ?? "User") { success in
+            DatabaseManager.shared.createNewconversation(with: otherUserEmail, firstMessage: message ,name: self.title ?? "User") { [weak self] success in
                 if success{
                     print("Message sent")
+                    guard let storngSelf = self else{
+                        return
+                    }
+                    storngSelf.isNewConversation =  false
+//                    storngSelf.messages.append(message)
+//                    storngSelf.messagesCollectionView.reloadDataAndKeepOffset()
+//                    storngSelf.messagesCollectionView.scrollToLastItem()
+                    print("Vlaue of isNewConversation is \(storngSelf.isNewConversation)")
                 }
                 else{
                     print("Falied to send")
@@ -160,6 +167,18 @@ extension ChatViewController : InputBarAccessoryViewDelegate{
         }
         else{
             // append to existing convo
+            print("Going to append in existing convo")
+            guard let conversationId = conversationId , let name = self.title  else {
+                return
+            }
+            DatabaseManager.shared.sendMessage(to: conversationId, otherUserEmail : otherUserEmail ,name: name, message: message) { success in
+                if success{
+                    print("Message sent")
+                }
+                else{
+                    print("Failed to send the message")
+                }
+            }
         }
     }
     
